@@ -1,0 +1,601 @@
+/* House Price Prediction -- KZ-ML-01 custom theme */
+
+:root {
+  --primary: #4a3aa7;
+  --primary-2: #2a78d6;
+  --accent: #1baf7a;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --muted: #898781;
+  --surface: #fcfcfb;
+  --page: #f4f3fb;
+  --border: rgba(11, 11, 11, 0.10);
+  --good: #0ca30c;
+  --shadow: 0 10px 30px rgba(74, 58, 167, 0.12);
+  --shadow-sm: 0 4px 14px rgba(11, 11, 11, 0.06);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #8f8d87;
+    --surface: #1a1a19;
+    --page: #121117;
+    --border: rgba(255, 255, 255, 0.10);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--page);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, .brand-font {
+  font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+main { flex: 1 0 auto; }
+
+a { text-decoration: none; }
+
+::selection { background: var(--primary); color: #fff; }
+
+/* ---------- Navbar ---------- */
+.navbar-kz {
+  background: rgba(252, 252, 251, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+@media (prefers-color-scheme: dark) {
+  .navbar-kz { background: rgba(26, 26, 25, 0.75); }
+}
+
+.navbar-kz .navbar-brand {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-primary) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-kz .brand-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-kz .nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.9rem !important;
+  transition: all 0.2s ease;
+}
+
+.navbar-kz .nav-link:hover,
+.navbar-kz .nav-link.active {
+  color: var(--text-primary) !important;
+  background: rgba(74, 58, 167, 0.08);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(74, 58, 167, 0.18), transparent 60%),
+    radial-gradient(900px 400px at 100% 0%, rgba(27, 175, 122, 0.14), transparent 55%),
+    var(--page);
+  padding: 3.5rem 0 2.5rem;
+}
+
+.hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(74, 58, 167, 0.08);
+  border: 1px solid rgba(74, 58, 167, 0.18);
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+}
+
+.hero h1 {
+  font-weight: 700;
+  font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+  line-height: 1.15;
+  margin: 1rem 0 0.75rem;
+}
+
+.hero .gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero p.lead {
+  color: var(--text-secondary);
+  max-width: 640px;
+}
+
+/* ---------- Cards ---------- */
+.kz-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.kz-card-sm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-section-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.form-section-title .bi {
+  color: var(--primary);
+}
+
+/* ---------- Form controls ---------- */
+.form-label {
+  font-weight: 500;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.form-control,
+.form-select {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--page);
+  color: var(--text-primary);
+  padding: 0.6rem 0.85rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Explicit white text + placeholder in dark mode so Bootstrap can't override */
+@media (prefers-color-scheme: dark) {
+  .form-control,
+  .form-select {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    color-scheme: dark;
+  }
+
+  .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--primary-2);
+    color: #ffffff;
+    color-scheme: dark;
+  }
+
+  /* Select arrow and option text in dark mode */
+  .form-select option {
+    background: #1e1e2a;
+    color: #ffffff;
+  }
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-2);
+  box-shadow: 0 0 0 0.2rem rgba(42, 120, 214, 0.18);
+  background: var(--surface);
+}
+
+.toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.6rem;
+}
+
+.toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--page);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.9rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.toggle-card:has(.form-check-input:checked) {
+  border-color: var(--accent);
+  background: rgba(27, 175, 122, 0.08);
+}
+
+.toggle-card label {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.toggle-card .bi { color: var(--muted); }
+.toggle-card:has(.form-check-input:checked) .bi { color: var(--accent); }
+
+.form-check-input {
+  width: 2.5em;
+  height: 1.4em;
+}
+
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- Buttons ---------- */
+.btn-gradient {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(74, 58, 167, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(74, 58, 167, 0.38);
+  color: #fff;
+}
+
+.btn-outline-kz {
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  background: var(--surface);
+  font-weight: 600;
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+
+.btn-outline-kz:hover {
+  border-color: var(--primary-2);
+  color: var(--primary-2);
+  background: var(--surface);
+}
+
+/* ---------- Alerts ---------- */
+.alert-kz {
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(211, 59, 59, 0.25);
+  background: rgba(211, 59, 59, 0.08);
+  color: #a52f2f;
+  padding: 0.9rem 1.1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .alert-kz { color: #e66767; }
+}
+
+/* ---------- Result page ---------- */
+.price-reveal {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(600px 260px at 50% -20%, rgba(27, 175, 122, 0.18), transparent 60%),
+    var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.price-reveal .price-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.price-reveal .price-value {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0.25rem 0;
+}
+
+.price-reveal .price-words {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.feature-chip.on { color: var(--good); border-color: rgba(12, 163, 12, 0.3); background: rgba(12, 163, 12, 0.07); }
+.feature-chip .bi { font-size: 0.9rem; }
+
+/* ---------- History table ---------- */
+.table-kz {
+  --bs-table-bg: transparent;
+  margin-bottom: 0;
+}
+
+.table-kz thead th {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding: 0.9rem 1rem;
+}
+
+.table-kz tbody td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.table-kz tbody tr:last-child td { border-bottom: none; }
+.table-kz tbody tr:hover { background: rgba(74, 58, 167, 0.04); }
+
+.badge-kz {
+  background: rgba(42, 120, 214, 0.1);
+  color: var(--primary-2);
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  color: var(--text-secondary);
+}
+
+.empty-state .bi { font-size: 2.6rem; color: var(--muted); }
+
+/* ---------- Stat tiles (insights) ---------- */
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-tile .stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.stat-tile .stat-value {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 0.2rem;
+}
+
+.stat-tile .stat-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+/* R2 comparison bar chart */
+.cmp-chart .cmp-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 70px;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.cmp-chart .cmp-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cmp-chart .cmp-track {
+  height: 22px;
+  background: var(--page);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.cmp-chart .cmp-fill {
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+}
+
+.cmp-chart .cmp-value {
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.eda-card img {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.eda-card .eda-caption {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.6rem;
+}
+
+/* ---------- Footer ---------- */
+.footer-kz {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ---------- Count-up animation helper ---------- */
+.count-up { opacity: 0; animation: fadeIn 0.6s ease forwards 0.1s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fadeUp 0.5s ease forwards;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Dark-mode Bootstrap overrides (must come last to win specificity) ---------- */
+
+/* Bootstrap sets its own --bs-body-color / --bs-form-control-color based on data-bs-theme,
+   but we use prefers-color-scheme, so we override with high-specificity selectors. */
+@media (prefers-color-scheme: dark) {
+
+  /* Input / textarea */
+  .form-control {
+    --bs-body-color: #ffffff;
+    --bs-body-bg: rgba(255, 255, 255, 0.06);
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.30) !important;
+    opacity: 1;
+  }
+
+  .form-control:focus {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.10) !important;
+    border-color: var(--primary-2) !important;
+    box-shadow: 0 0 0 0.2rem rgba(42, 120, 214, 0.25) !important;
+  }
+
+  /* Select */
+  .form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  .form-select option,
+  .form-select optgroup {
+    background-color: #1e1e2a;
+    color: #ffffff;
+  }
+
+  .form-select:focus {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.10) !important;
+    border-color: var(--primary-2) !important;
+  }
+
+  /* Number input spinner arrows — inherit white */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.5;
+  }
+
+  /* Toggle card background in dark */
+  .toggle-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.10);
+  }
+
+  .toggle-card:has(.form-check-input:checked) {
+    background: rgba(27, 175, 122, 0.12);
+    border-color: rgba(27, 175, 122, 0.4);
+  }
+
+  /* Form card body */
+  .kz-card {
+    background: #1a1a21;
+  }
+
+  /* Table row hover */
+  .table-kz tbody td {
+    color: #e8e8e8;
+  }
+}

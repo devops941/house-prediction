@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Prediction Result{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div class="price-reveal fade-up mb-4">
+        <div class="price-label"><i class="bi bi-check-circle-fill text-success me-1"></i>Estimated Market Price</div>
+        <div class="price-value" id="priceValue" data-target="{{ price_raw }}">₹0</div>
+        <div class="price-words">{{ price_words }}</div>
+      </div>
+
+      <div class="kz-card p-4 p-md-5 fade-up">
+        <div class="form-section-title"><i class="bi bi-clipboard-data"></i> Based on the details you entered</div>
+        <div class="row g-2 mb-3">
+          <div class="col-auto"><span class="feature-chip"><i class="bi bi-rulers"></i>{{ data.area }} sq ft</span></div>
+          <div class="col-auto"><span class="feature-chip"><i class="bi bi-door-closed"></i>{{ data.bedrooms }} Bed</span></div>
+          <div class="col-auto"><span class="feature-chip"><i class="bi bi-droplet"></i>{{ data.bathrooms }} Bath</span></div>
+          <div class="col-auto"><span class="feature-chip"><i class="bi bi-building"></i>{{ data.stories }} {{ 'Story' if data.stories == 1 else 'Stories' }}</span></div>
+          <div class="col-auto"><span class="feature-chip"><i class="bi bi-car-front"></i>{{ data.parking }} Parking</span></div>
+          <div class="col-auto"><span class="feature-chip"><i class="bi bi-palette"></i>{{ data.furnishingstatus|replace('-', ' ')|title }}</span></div>
+        </div>
+
+        <div class="row g-2">
+          {% set amenity_labels = {
+            'mainroad': ('Main road', 'bi-signpost-2'),
+            'guestroom': ('Guest room', 'bi-person-plus'),
+            'basement': ('Basement', 'bi-layers'),
+            'hotwaterheating': ('Hot water heating', 'bi-droplet-half'),
+            'airconditioning': ('Air conditioning', 'bi-snow2'),
+            'prefarea': ('Preferred area', 'bi-geo-alt'),
+          } %}
+          {% for field, meta in amenity_labels.items() %}
+            {% set label, icon = meta %}
+            <div class="col-auto">
+              <span class="feature-chip {% if other_features.get(field) == 'yes' %}on{% endif %}">
+                <i class="bi {{ icon }}"></i>{{ label }}
+                <i class="bi {{ 'bi-check-lg' if other_features.get(field) == 'yes' else 'bi-x-lg' }}"></i>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-kz"><i class="bi bi-arrow-repeat me-1"></i>Predict Another</a>
+        <a href="{{ url_for('history') }}" class="btn btn-gradient"><i class="bi bi-clock-history me-1"></i>View History</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const el = document.getElementById("priceValue");
+    const target = parseFloat(el.dataset.target) || 0;
+    const duration = 900;
+    const start = performance.now();
+
+    function formatINR(n) {
+      n = Math.round(n);
+      const sign = n < 0 ? "-" : "";
+      n = Math.abs(n);
+      let digits = String(n);
+      if (digits.length > 3) {
+        const last3 = digits.slice(-3);
+        let rest = digits.slice(0, -3);
+        const groups = [];
+        while (rest.length > 2) {
+          groups.unshift(rest.slice(-2));
+          rest = rest.slice(0, -2);
+        }
+        if (rest) groups.unshift(rest);
+        digits = groups.join(",") + "," + last3;
+      }
+      return sign + "₹" + digits;
+    }
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = formatINR(target * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+</script>
+{% endblock %}
