@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="empty card" style="padding:4rem 1rem">
+    <i class="bi bi-signpost-2" style="font-size:3.5rem"></i>
+    <h1>404 — Page not found</h1>
+    <p class="muted">The page or listing you're looking for doesn't exist or has been removed.</p>
+    <div class="row center" style="gap:.6rem;justify-content:center">
+      <a href="/" class="btn btn-primary"><i class="bi bi-house"></i> Go home</a>
+      <a href="/properties" class="btn btn-outline">Browse properties</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

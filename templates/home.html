@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% from "_card.html" import property_card %}
+{% set nav_active = 'home' %}
+{% block title %}Buy, Rent &amp; Lease Property Directly from Owners{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <h1>Find your next home.<br>Zero brokerage, directly from owners.</h1>
+    <p class="lead">Search verified apartments, villas, plots and commercial spaces across India. Post your own property for free and connect with genuine buyers and tenants.</p>
+
+    <form class="search-hero" action="/properties" method="get" id="heroSearch">
+      <div class="tabs" id="heroTabs">
+        <button type="button" class="active" data-type="buy">Buy</button>
+        <button type="button" data-type="rent">Rent</button>
+        <button type="button" data-type="commercial">Commercial</button>
+      </div>
+      <input type="hidden" name="listing_type" id="heroListingType" value="buy">
+      <div class="searchbar">
+        <select name="city" aria-label="City">
+          <option value="">All cities</option>
+          {% for city in city_options %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
+        </select>
+        <input type="text" name="q" placeholder="Search locality, project or landmark…" aria-label="Search">
+        <select name="bedrooms" aria-label="Bedrooms">
+          <option value="">Any BHK</option>
+          <option value="1">1 BHK</option>
+          <option value="2">2 BHK</option>
+          <option value="3">3 BHK</option>
+          <option value="4">4+ BHK</option>
+        </select>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+      </div>
+    </form>
+
+    <div class="hero-stats">
+      <div><b>{{ counts.buy }}</b> homes for sale</div>
+      <div><b>{{ counts.rent }}</b> homes for rent</div>
+      <div><b>{{ counts.commercial }}</b> commercial spaces</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row wrap" style="gap:1.25rem">
+      {% set tiles = [
+        ('buy', 'bi-house-heart', 'Buy a home', 'Ready-to-move & under-construction homes, villas and plots.', 'var(--primary-soft)', 'var(--primary)'),
+        ('rent', 'bi-key', 'Rent a home', 'Furnished and unfurnished rentals with flexible terms.', 'var(--green-soft)', 'var(--green)'),
+        ('commercial', 'bi-shop', 'Commercial', 'Offices, shops, warehouses and land for your business.', 'var(--accent-soft)', 'var(--accent)')
+      ] %}
+      {% for key, icon, title, desc, bg, fg in tiles %}
+      <a class="card card-pad grow" href="/properties?listing_type={{ key }}" style="min-width:260px;text-decoration:none">
+        <span style="width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:{{ bg }};color:{{ fg }};font-size:1.35rem">
+          <i class="bi {{ icon }}"></i>
+        </span>
+        <h3 class="mt-2 mb-0">{{ title }}</h3>
+        <p class="muted small mb-0">{{ desc }}</p>
+        <span class="badge mt-2">{{ counts[key] }} listings <i class="bi bi-arrow-right"></i></span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>Featured properties</h2>
+        <div class="sub">Hand-picked listings from verified owners</div>
+      </div>
+      <a href="/properties" class="btn btn-outline btn-sm">View all <i class="bi bi-arrow-right"></i></a>
+    </div>
+    {% if featured %}
+    <div class="prop-grid">
+      {% for p in featured %}{{ property_card(p) }}{% endfor %}
+    </div>
+    {% else %}
+    <div class="empty card">
+      <i class="bi bi-house-add"></i>
+      <h3>No listings yet</h3>
+      <p>Be the first to post a property on {{ app_name }}.</p>
+      <a href="/post" class="btn btn-primary">Post your property — it's free</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="card card-pad" style="background:linear-gradient(135deg,#eaf0fb,#f6f8fb)">
+      <div class="row wrap center" style="gap:2rem">
+        <div class="grow" style="min-width:280px">
+          <h2 class="mb-1">Not sure what your property is worth?</h2>
+          <p class="text-2 muted">Our machine-learning model estimates a fair market price from area, configuration, amenities and furnishing — trained on real housing data.</p>
+          <a href="/insights" class="btn btn-primary"><i class="bi bi-graph-up-arrow"></i> Try the AI price estimator</a>
+        </div>
+        <div class="card card-pad" style="min-width:230px;background:#fff">
+          <div class="muted small">Model accuracy</div>
+          <div style="font-family:Poppins;font-size:2rem;font-weight:700;color:var(--primary)">R² ≈ 0.65</div>
+          <div class="muted small">Linear Regression · 545 training records</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-head"><h2>Why {{ app_name }}?</h2></div>
+    <div class="grid-4">
+      {% set feats = [
+        ('bi-shield-check', 'Verified owners', 'Every listing is tied to a registered account you can contact directly.'),
+        ('bi-cash-coin', 'Zero brokerage', 'No middlemen. Talk to the owner and negotiate the best price.'),
+        ('bi-graph-up-arrow', 'AI price insight', 'Instant, data-driven price estimates before you post.'),
+        ('bi-funnel', 'Smart filters', 'Filter by city, budget, BHK, furnishing, area and more.')
+      ] %}
+      {% for icon, title, desc in feats %}
+      <div class="card card-pad">
+        <i class="bi {{ icon }}" style="font-size:1.5rem;color:var(--primary)"></i>
+        <h3 class="mt-2 mb-1">{{ title }}</h3>
+        <p class="muted small mb-0">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="card card-pad row wrap center" style="gap:1.5rem;background:var(--text);color:#fff">
+      <div class="grow" style="min-width:260px">
+        <h2 style="color:#fff" class="mb-1">Have a property to sell or rent out?</h2>
+        <p style="color:#a9b6c9" class="mb-0">Post it in under two minutes. It's free, and your listing reaches thousands of genuine seekers.</p>
+      </div>
+      <a href="/post" class="btn btn-accent btn-lg"><i class="bi bi-plus-circle"></i> Post property free</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.NESTQUEST_AUTH = {{ 'true' if current_user else 'false' }};
+  document.getElementById("heroTabs")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-type]");
+    if (!btn) return;
+    document.querySelectorAll("#heroTabs button").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("heroListingType").value = btn.dataset.type;
+    const bhk = document.querySelector('#heroSearch select[name=bedrooms]');
+    if (bhk) bhk.closest("select").style.display = btn.dataset.type === "commercial" ? "none" : "";
+  });
+</script>
+{% endblock %}

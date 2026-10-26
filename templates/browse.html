@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "_card.html" import property_card %}
+{% set nav_active = filters.listing_type or 'all' %}
+{% block title %}
+{% if filters.listing_type == 'rent' %}Properties for Rent{% elif filters.listing_type == 'commercial' %}Commercial Properties{% elif filters.listing_type == 'buy' %}Properties for Sale{% else %}Search Properties{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="dash-head">
+  <div class="container">
+    <h1 class="mb-0">
+      {% if filters.listing_type == 'rent' %}Homes for rent
+      {% elif filters.listing_type == 'commercial' %}Commercial spaces
+      {% elif filters.listing_type == 'buy' %}Properties for sale
+      {% else %}All properties{% endif %}
+      <span class="muted" style="font-size:1rem;font-weight:500">· {{ total }} listing{{ '' if total == 1 else 's' }}</span>
+    </h1>
+  </div>
+</div>
+
+<div class="container section" style="padding-top:1.6rem">
+  <form class="filters" method="get" action="/properties">
+    <div class="filters-row">
+      <div>
+        <label class="lbl">Looking to</label>
+        <select class="select" name="listing_type">
+          <option value="" {% if not filters.listing_type %}selected{% endif %}>All</option>
+          <option value="buy" {% if filters.listing_type == 'buy' %}selected{% endif %}>Buy</option>
+          <option value="rent" {% if filters.listing_type == 'rent' %}selected{% endif %}>Rent</option>
+          <option value="commercial" {% if filters.listing_type == 'commercial' %}selected{% endif %}>Commercial</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">City</label>
+        <select class="select" name="city">
+          <option value="">All cities</option>
+          {% for c in cities %}<option value="{{ c }}" {% if filters.city == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Property type</label>
+        <select class="select" name="property_type">
+          <option value="">Any type</option>
+          {% for key, label in property_type_labels.items() %}
+          <option value="{{ key }}" {% if filters.property_type == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Bedrooms</label>
+        <select class="select" name="bedrooms">
+          <option value="">Any</option>
+          {% for n in [1, 2, 3, 4, 5] %}
+          <option value="{{ n }}" {% if filters.bedrooms == n|string %}selected{% endif %}>{{ n }}+ BHK</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Furnishing</label>
+        <select class="select" name="furnishing">
+          <option value="">Any</option>
+          {% for key, label in furnishing_labels.items() %}
+          <option value="{{ key }}" {% if filters.furnishing == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Min price (₹)</label>
+        <input class="input" type="number" name="min_price" min="0" placeholder="0" value="{{ filters.min_price }}">
+      </div>
+      <div>
+        <label class="lbl">Max price (₹)</label>
+        <input class="input" type="number" name="max_price" min="0" placeholder="Any" value="{{ filters.max_price }}">
+      </div>
+      <div>
+        <label class="lbl">Sort by</label>
+        <select class="select" name="sort">
+          <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Newest first</option>
+          <option value="price_asc" {% if filters.sort == 'price_asc' %}selected{% endif %}>Price: low to high</option>
+          <option value="price_desc" {% if filters.sort == 'price_desc' %}selected{% endif %}>Price: high to low</option>
+          <option value="area_desc" {% if filters.sort == 'area_desc' %}selected{% endif %}>Largest area</option>
+          <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>Most viewed</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">&nbsp;</label>
+        <div class="row" style="gap:.5rem">
+          <button class="btn btn-primary grow" type="submit"><i class="bi bi-funnel"></i> Apply</button>
+          <a class="btn btn-ghost" href="/properties" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" name="q" value="{{ filters.q }}">
+
+    {% set active = [] %}
+    {% if filters.q %}{% set _ = active.append('Search: ' ~ filters.q) %}{% endif %}
+    {% if filters.city %}{% set _ = active.append('City: ' ~ filters.city) %}{% endif %}
+    {% if filters.listing_type %}{% set _ = active.append('Type: ' ~ listing_labels.get(filters.listing_type, filters.listing_type)) %}{% endif %}
+    {% if filters.property_type %}{% set _ = active.append('Property: ' ~ property_type_labels.get(filters.property_type, filters.property_type)) %}{% endif %}
+    {% if filters.bedrooms %}{% set _ = active.append(filters.bedrooms ~ '+ BHK') %}{% endif %}
+    {% if filters.furnishing %}{% set _ = active.append(furnishing_labels.get(filters.furnishing, filters.furnishing)) %}{% endif %}
+    {% if filters.min_price %}{% set _ = active.append('Min ₹' ~ filters.min_price) %}{% endif %}
+    {% if filters.max_price %}{% set _ = active.append('Max ₹' ~ filters.max_price) %}{% endif %}
+    {% if active %}
+    <div class="chips">
+      {% for chip in active %}<span class="chip"><i class="bi bi-tag"></i> {{ chip }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  </form>
+
+  {% if items %}
+  <div class="prop-grid">
+    {% for p in items %}{{ property_card(p) }}{% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card">
+    <i class="bi bi-search"></i>
+    <h3>No properties matched your filters</h3>
+    <p>Try widening your budget or removing a filter.</p>
+    <a href="/properties" class="btn btn-outline">Clear all filters</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.NESTQUEST_AUTH = {{ 'true' if current_user else 'false' }};</script>
+{% endblock %}

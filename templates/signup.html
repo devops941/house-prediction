@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Create your account{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <aside class="auth-aside">
+    <a class="brand" href="/" style="margin-bottom:2rem">
+      <span class="brand-mark" style="background:rgba(255,255,255,.2)"><i class="bi bi-buildings"></i></span>
+      <span class="brand-text" style="color:#fff">{{ app_name }}</span>
+    </a>
+    <h2>Join {{ app_name }} today</h2>
+    <p style="color:rgba(255,255,255,.85)">One account to buy, rent and lease — plus post your own properties for free.</p>
+    <ul>
+      <li><i class="bi bi-check-circle-fill"></i> Free, unlimited property listings</li>
+      <li><i class="bi bi-check-circle-fill"></i> Direct owner contact, no brokers</li>
+      <li><i class="bi bi-check-circle-fill"></i> AI-powered fair price estimates</li>
+      <li><i class="bi bi-check-circle-fill"></i> Shortlist and manage everything in one dashboard</li>
+    </ul>
+  </aside>
+
+  <div class="auth-form-side">
+    <div class="auth-card">
+      <h1>Create your account</h1>
+      <p class="muted">Already registered? <a href="/login{% if next %}?next={{ next }}{% endif %}">Log in instead</a></p>
+
+      <div class="alert error hidden" id="signupAlert"></div>
+
+      <form id="signupForm" data-next="{{ next or '/dashboard' }}">
+        <div class="field">
+          <label>Full name</label>
+          <input class="input" name="name" required minlength="2" autocomplete="name" placeholder="Manoj Kumar">
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input class="input" type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <input class="input" name="phone" autocomplete="tel" placeholder="98xxxxxxxx">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="input" type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters">
+          <div class="hint">Use at least 6 characters.</div>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit"><i class="bi bi-person-plus"></i> Create account</button>
+      </form>
+
+      <p class="hint mt-3">By creating an account you agree to list accurate property information and to be contacted by genuine seekers.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.NESTQUEST_AUTH = false;</script>
+{% endblock %}

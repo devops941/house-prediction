@@ -1,89 +1,139 @@
 {% extends "base.html" %}
-{% block title %}Model Insights{% endblock %}
+{% block title %}AI price estimator &amp; model insights{% endblock %}
 
 {% block content %}
-<section class="container py-5">
-  <h2 class="mb-1">Model Insights</h2>
-  <p class="text-secondary mb-4">How the deployed model was chosen, and what the training data looks like.</p>
-
-  {% if metrics %}
-  {% set lin = metrics.linear_regression %}
-  {% set tree = metrics.decision_tree %}
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-      <div class="stat-tile">
-        <div class="stat-label">Deployed model</div>
-        <div class="stat-value" style="font-size:1.3rem;">{{ metrics.best_model }}</div>
-        <div class="stat-sub">Saved as model.pkl</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-tile">
-        <div class="stat-label">Test R&sup2;</div>
-        <div class="stat-value">{{ "%.3f"|format(lin.r2) }}</div>
-        <div class="stat-sub">Explains {{ (lin.r2 * 100)|round(1) }}% of price variation</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-tile">
-        <div class="stat-label">Mean Absolute Error</div>
-        <div class="stat-value" style="font-size:1.3rem;">{{ lin.mae | inr }}</div>
-        <div class="stat-sub">Average rupee error</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-tile">
-        <div class="stat-label">RMSE</div>
-        <div class="stat-value" style="font-size:1.3rem;">{{ lin.rmse | inr }}</div>
-        <div class="stat-sub">Penalises large misses</div>
-      </div>
-    </div>
+<div class="dash-head">
+  <div class="container">
+    <h1 class="mb-0"><i class="bi bi-graph-up-arrow"></i> AI price estimator</h1>
+    <div class="muted small">Estimate a fair market price from property features — powered by the trained Linear Regression model.</div>
   </div>
+</div>
 
-  <div class="kz-card p-4 p-md-5 mb-4">
-    <div class="form-section-title"><i class="bi bi-bar-chart-line"></i> Linear Regression vs Decision Tree -- test R&sup2;</div>
-    <div class="cmp-chart" role="img" aria-label="Linear Regression test R-squared {{ '%.3f'|format(lin.r2) }} versus Decision Tree test R-squared {{ '%.3f'|format(tree.r2) }}">
-      <div class="cmp-row">
-        <span class="cmp-name">Linear Regression</span>
-        <div class="cmp-track">
-          <div class="cmp-fill" style="width: {{ (lin.r2 * 100)|round(1) }}%; background: #2a78d6;"></div>
+<div class="container section" style="padding-top:1.6rem">
+  <div class="grid-2" style="grid-template-columns:minmax(0,1fr) 380px;align-items:start;gap:1.5rem">
+    <form class="card card-pad" id="estimatorForm">
+      <h3>Property details</h3>
+      <div class="grid-3">
+        <div class="field">
+          <label>Area (sq.ft) *</label>
+          <input class="input" type="number" name="area" min="1" max="200000" value="1800" required>
         </div>
-        <span class="cmp-value">{{ "%.3f"|format(lin.r2) }}</span>
-      </div>
-      <div class="cmp-row">
-        <span class="cmp-name">Decision Tree</span>
-        <div class="cmp-track">
-          <div class="cmp-fill" style="width: {{ (tree.r2 * 100)|round(1) }}%; background: #4a3aa7;"></div>
+        <div class="field">
+          <label>Bedrooms</label>
+          <input class="input" type="number" name="bedrooms" min="1" max="20" value="3">
         </div>
-        <span class="cmp-value">{{ "%.3f"|format(tree.r2) }}</span>
-      </div>
-    </div>
-    <p class="text-secondary small mb-0 mt-2">
-      Bars show test-set R&sup2; (higher is better). {{ metrics.best_model }} wins and is the model served by this app.
-      Trained on {{ metrics.n_train }} rows, evaluated on {{ metrics.n_test }} held-out rows ({{ metrics.n_rows }} total).
-    </p>
-  </div>
-  {% else %}
-    <div class="alert-kz mb-4">Run the training notebook to generate model/metrics.json before viewing insights.</div>
-  {% endif %}
-
-  <h4 class="mb-3">Exploratory Data Analysis</h4>
-  <div class="row g-3">
-    {% set charts = [
-      ('price_distribution.png', 'Distribution of house prices -- right-skewed with a long tail of expensive homes.'),
-      ('area_vs_price.png', 'Area vs price, coloured by furnishing status -- area has the strongest visible relationship.'),
-      ('bedrooms_boxplot.png', 'Price spread by number of bedrooms.'),
-      ('correlation_heatmap.png', 'Correlation heatmap across all encoded features.'),
-      ('actual_vs_predicted.png', 'Actual vs predicted price on the test set for both models.'),
-    ] %}
-    {% for file, caption in charts %}
-      <div class="col-md-6">
-        <div class="kz-card-sm p-3 eda-card h-100">
-          <img src="{{ url_for('static', filename='images/' + file) }}" alt="{{ caption }}" loading="lazy">
-          <div class="eda-caption">{{ caption }}</div>
+        <div class="field">
+          <label>Bathrooms</label>
+          <input class="input" type="number" name="bathrooms" min="1" max="20" value="2">
+        </div>
+        <div class="field">
+          <label>Stories / floors</label>
+          <input class="input" type="number" name="stories" min="1" max="10" value="2">
+        </div>
+        <div class="field">
+          <label>Parking spaces</label>
+          <input class="input" type="number" name="parking" min="0" max="10" value="1">
+        </div>
+        <div class="field">
+          <label>Furnishing</label>
+          <select class="select" name="furnishingstatus">
+            <option value="furnished">Furnished</option>
+            <option value="semi-furnished" selected>Semi-furnished</option>
+            <option value="unfurnished">Unfurnished</option>
+          </select>
         </div>
       </div>
-    {% endfor %}
+
+      <label class="lbl mt-2">Features</label>
+      <div class="checkgrid">
+        <label class="check"><input type="checkbox" name="mainroad" checked> <span>Main road access</span></label>
+        <label class="check"><input type="checkbox" name="guestroom"> <span>Guest room</span></label>
+        <label class="check"><input type="checkbox" name="basement"> <span>Basement</span></label>
+        <label class="check"><input type="checkbox" name="hotwaterheating"> <span>Hot water heating</span></label>
+        <label class="check"><input type="checkbox" name="airconditioning" checked> <span>Air conditioning</span></label>
+        <label class="check"><input type="checkbox" name="prefarea"> <span>Preferred area</span></label>
+      </div>
+
+      <button class="btn btn-primary btn-lg mt-3" type="submit"><i class="bi bi-magic"></i> Estimate price</button>
+    </form>
+
+    <aside class="sticky-side">
+      <div class="card card-pad">
+        <div class="muted small">Estimated market value</div>
+        <div id="resultValue" style="font-family:Poppins;font-size:2.1rem;font-weight:700;color:var(--primary)">—</div>
+        <div id="resultRange" class="muted small">Fill the form and click Estimate.</div>
+        <div class="estimate-box mt-2 hidden" id="resultBox">
+          <div class="row between"><span class="muted small">Full value</span><b id="resultFull">—</b></div>
+          <div class="row between mt-1"><span class="muted small">Model</span><b>{{ metrics.best_model or 'Linear Regression' }}</b></div>
+          <div class="row between mt-1"><span class="muted small">Test R²</span><b>{{ '%.2f'|format(metrics.linear_regression.r2) if metrics.linear_regression else '—' }}</b></div>
+          <div class="row between mt-1"><span class="muted small">Mean abs. error</span><b>{{ metrics.linear_regression.mae|inr if metrics.linear_regression else '—' }}</b></div>
+        </div>
+      </div>
+
+      <div class="card card-pad mt-2">
+        <h3>How it works</h3>
+        <p class="muted small mb-0">The model was trained on {{ metrics.n_rows or 545 }} housing records using area, configuration, amenities and furnishing as inputs. It is a guide to fair pricing — always cross-check with local market rates.</p>
+      </div>
+    </aside>
   </div>
-</section>
+
+  <div class="section-head mt-3"><h2 class="mb-0">Model performance</h2></div>
+  <div class="metric-grid">
+    <div class="metric"><div class="muted small">Best model</div><div class="v" style="font-size:1.1rem">{{ metrics.best_model or 'Linear Regression' }}</div></div>
+    {% if metrics.linear_regression %}
+    <div class="metric"><div class="muted small">Linear Regression R²</div><div class="v">{{ '%.3f'|format(metrics.linear_regression.r2) }}</div></div>
+    <div class="metric"><div class="muted small">Linear Regression MAE</div><div class="v" style="font-size:1.1rem">{{ metrics.linear_regression.mae|inr }}</div></div>
+    <div class="metric"><div class="muted small">Linear Regression RMSE</div><div class="v" style="font-size:1.1rem">{{ metrics.linear_regression.rmse|inr }}</div></div>
+    {% endif %}
+    {% if metrics.decision_tree %}
+    <div class="metric"><div class="muted small">Decision Tree R²</div><div class="v">{{ '%.3f'|format(metrics.decision_tree.r2) }}</div></div>
+    {% endif %}
+    <div class="metric"><div class="muted small">Training records</div><div class="v">{{ metrics.n_rows or 545 }}</div></div>
+  </div>
+
+  <div class="section-head mt-3"><h2 class="mb-0">Exploratory data analysis</h2></div>
+  <div class="chart-grid">
+    <figure><img src="/static/images/price_distribution.png" alt="Price distribution"><figcaption>Distribution of house prices in the training data.</figcaption></figure>
+    <figure><img src="/static/images/area_vs_price.png" alt="Area vs price"><figcaption>Built-up area against price — the strongest linear driver.</figcaption></figure>
+    <figure><img src="/static/images/correlation_heatmap.png" alt="Correlation heatmap"><figcaption>Correlation between numeric features and price.</figcaption></figure>
+    <figure><img src="/static/images/actual_vs_predicted.png" alt="Actual vs predicted"><figcaption>Actual vs predicted prices on the held-out test set.</figcaption></figure>
+    <figure><img src="/static/images/bedrooms_boxplot.png" alt="Bedrooms boxplot"><figcaption>Price spread across bedroom counts.</figcaption></figure>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.NESTQUEST_AUTH = {{ 'true' if current_user else 'false' }};
+  document.getElementById("estimatorForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    const btn = form.querySelector("[type=submit]");
+    btn.disabled = true;
+    try {
+      const payload = {
+        area: Number(fd.get("area")),
+        bedrooms: Number(fd.get("bedrooms")),
+        bathrooms: Number(fd.get("bathrooms")),
+        stories: Number(fd.get("stories")),
+        parking: Number(fd.get("parking")),
+        furnishingstatus: fd.get("furnishingstatus"),
+        mainroad: form.querySelector("[name=mainroad]").checked,
+        guestroom: form.querySelector("[name=guestroom]").checked,
+        basement: form.querySelector("[name=basement]").checked,
+        hotwaterheating: form.querySelector("[name=hotwaterheating]").checked,
+        airconditioning: form.querySelector("[name=airconditioning]").checked,
+        prefarea: form.querySelector("[name=prefarea]").checked,
+      };
+      const res = await API.post("/api/ml/predict", payload);
+      document.getElementById("resultValue").textContent = res.price_label;
+      document.getElementById("resultRange").textContent = `Expected range: ${res.range_label}`;
+      document.getElementById("resultFull").textContent = res.price_full;
+      document.getElementById("resultBox").classList.remove("hidden");
+    } catch (err) {
+      toast(err.message, "error");
+    } finally { btn.disabled = false; }
+  });
+</script>
 {% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Admin panel{% endblock %}
+
+{% block content %}
+<div class="dash-head">
+  <div class="container">
+    <h1 class="mb-0"><i class="bi bi-shield-lock"></i> Admin panel</h1>
+    <div class="muted small">Moderate listings, manage users and monitor platform activity.</div>
+  </div>
+</div>
+
+<div class="container section" style="padding-top:1.6rem">
+  <div class="stat-grid">
+    {% set cards = [
+      (stats.total_properties, 'Total listings', 'bi-houses'),
+      (stats.active_properties, 'Active', 'bi-broadcast'),
+      (stats.pending_properties, 'Pending review', 'bi-hourglass-split'),
+      (stats.total_users, 'Registered users', 'bi-people'),
+      (stats.total_enquiries, 'Enquiries', 'bi-chat-dots'),
+      (stats.total_predictions, 'AI estimates run', 'bi-graph-up-arrow')
+    ] %}
+    {% for value, label, icon in cards %}
+    <div class="stat">
+      <div class="row between center">
+        <div class="n">{{ value }}</div>
+        <i class="bi {{ icon }}" style="font-size:1.3rem;color:var(--primary);opacity:.7"></i>
+      </div>
+      <div class="l">{{ label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section-head mt-3">
+    <h2 class="mb-0">All listings</h2>
+    <span class="sub">{{ items|length }} total</span>
+  </div>
+  {% if items %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Property</th><th>Owner</th><th>Type</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for p in items %}
+        <tr>
+          <td>
+            <a href="/property/{{ p.id }}" style="font-weight:600">{{ p.title }}</a>
+            <div class="muted small">{{ p.locality }}, {{ p.city }}{% if p.featured %} · <span class="badge amber">Featured</span>{% endif %}</div>
+          </td>
+          <td class="muted small">{{ p.owner_name or '—' }}</td>
+          <td><span class="badge grey">{{ p.listing_label }}</span></td>
+          <td style="font-weight:600">{{ p.price_label }}</td>
+          <td>
+            {% if p.status == 'active' %}<span class="badge green">{{ p.status_label }}</span>
+            {% elif p.status == 'pending' %}<span class="badge amber">{{ p.status_label }}</span>
+            {% elif p.status == 'rejected' %}<span class="badge red">{{ p.status_label }}</span>
+            {% else %}<span class="badge grey">{{ p.status_label }}</span>{% endif %}
+          </td>
+          <td>
+            <div class="row wrap" style="gap:.35rem">
+              {% if p.status != 'active' %}
+              <button class="btn btn-sm" style="background:var(--green-soft);color:var(--green)" data-status="active" data-id="{{ p.id }}"><i class="bi bi-check2"></i> Approve</button>
+              {% endif %}
+              {% if p.status != 'rejected' %}
+              <button class="btn btn-danger btn-sm" data-status="rejected" data-id="{{ p.id }}"><i class="bi bi-x"></i> Reject</button>
+              {% endif %}
+              <button class="btn btn-ghost btn-sm" data-status="{{ p.status }}" data-featured="{{ 'false' if p.featured else 'true' }}" data-id="{{ p.id }}" title="Toggle featured">
+                <i class="bi {% if p.featured %}bi-star-fill{% else %}bi-star{% endif %}" style="color:var(--accent)"></i>
+              </button>
+              <a class="btn btn-ghost btn-sm" href="/edit/{{ p.id }}"><i class="bi bi-pencil"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty card"><i class="bi bi-houses"></i><h3>No listings yet</h3></div>
+  {% endif %}
+
+  <div class="section-head mt-3">
+    <h2 class="mb-0">Registered users</h2>
+    <span class="sub">{{ users|length }} total</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Listings</th><th>Joined</th><th></th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td style="font-weight:600">{{ u.name }}</td>
+          <td class="muted small">{{ u.email }}</td>
+          <td class="muted small">{{ u.phone or '—' }}</td>
+          <td>{% if u.role == 'admin' %}<span class="badge amber"><i class="bi bi-shield-check"></i> Admin</span>{% else %}<span class="badge grey">User</span>{% endif %}</td>
+          <td>{{ u.listings_count }}</td>
+          <td class="muted small">{{ u.created_at.strftime('%d %b %Y') if u.created_at else '—' }}</td>
+          <td>
+            {% if u.id != current_user.id %}
+            <button class="btn btn-danger btn-sm" data-del-user="{{ u.id }}" title="Delete user"><i class="bi bi-trash"></i></button>
+            {% else %}<span class="muted small">You</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.NESTQUEST_AUTH = true;</script>
+{% endblock %}

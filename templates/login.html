@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <aside class="auth-aside">
+    <a class="brand" href="/" style="margin-bottom:2rem">
+      <span class="brand-mark" style="background:rgba(255,255,255,.2)"><i class="bi bi-buildings"></i></span>
+      <span class="brand-text" style="color:#fff">{{ app_name }}</span>
+    </a>
+    <h2>Welcome back 👋</h2>
+    <p style="color:rgba(255,255,255,.85)">Log in to manage your listings, shortlisted properties and enquiries.</p>
+    <ul>
+      <li><i class="bi bi-check-circle-fill"></i> Post unlimited properties for free</li>
+      <li><i class="bi bi-check-circle-fill"></i> Track views and enquiries in real time</li>
+      <li><i class="bi bi-check-circle-fill"></i> Shortlist and compare your favourites</li>
+      <li><i class="bi bi-check-circle-fill"></i> Talk to owners directly — zero brokerage</li>
+    </ul>
+  </aside>
+
+  <div class="auth-form-side">
+    <div class="auth-card">
+      <h1>Log in</h1>
+      <p class="muted">New to {{ app_name }}? <a href="/signup{% if next %}?next={{ next }}{% endif %}">Create an account</a></p>
+
+      <div class="alert error hidden" id="loginAlert"></div>
+
+      <form id="loginForm" data-next="{{ next or '/dashboard' }}">
+        <div class="field">
+          <label>Email address</label>
+          <input class="input" type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="input" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit"><i class="bi bi-box-arrow-in-right"></i> Log in</button>
+      </form>
+
+      <div class="alert info mt-3" style="font-size:.82rem">
+        <i class="bi bi-info-circle"></i>
+        <span>Demo admin: <b>admin@gmail.com</b> / <b>Admin@123</b><br>Demo owner: <b>owner1@demo.com</b> / <b>Demo@123</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.NESTQUEST_AUTH = false;</script>
+{% endblock %}
