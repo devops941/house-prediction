@@ -372,6 +372,94 @@ small, .small { font-size: .82rem; }
   .hero { padding: 2.2rem 0 2.6rem; }
 }
 
+/* ---- Image uploader ---- */
+.uploader {
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--surface);
+  transition: border-color .18s ease, background .18s ease;
+  user-select: none;
+}
+.uploader:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.uploader.dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.uploader.loading {
+  opacity: .6;
+  pointer-events: none;
+}
+.uploader-text {
+  font-weight: 600;
+  font-size: .94rem;
+  color: var(--text-2);
+  margin-bottom: .25rem;
+}
+.uploader-hint {
+  font-size: .78rem;
+  color: var(--muted);
+}
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: .6rem;
+  margin-top: .75rem;
+}
+.upload-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--primary-soft);
+}
+.upload-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.upload-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(11, 22, 40, .65);
+  color: #fff;
+  font-size: .72rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: background .14s;
+}
+.upload-remove:hover {
+  background: var(--red);
+}
+.upload-item .cover-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: .1rem .38rem;
+  border-radius: 5px;
+  letter-spacing: .03em;
+}
+
 /* ---------- Modal ---------- */
 .modal { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; padding: 1.25rem; }
 .modal-backdrop { position: absolute; inset: 0; background: rgba(11, 22, 40, .55); backdrop-filter: blur(2px); }

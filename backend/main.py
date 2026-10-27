@@ -13,7 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import database
 from .config import settings
 from .ml import predict as ml_engine
-from .routers import admin, auth, enquiries, pages, properties
+from .routers import admin, auth, enquiries, pages, properties, uploads
 from .routers import ml as ml_router
 from .seed import seed_admin, seed_demo_properties
 
@@ -44,6 +44,7 @@ app.include_router(properties.router)
 app.include_router(enquiries.router)
 app.include_router(admin.router)
 app.include_router(ml_router.router)
+app.include_router(uploads.router)
 app.include_router(pages.router)
 
 

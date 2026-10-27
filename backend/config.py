@@ -51,6 +51,11 @@ class Settings:
         self.smtp_from = os.environ.get("SMTP_FROM", "noreply@example.com")
         self.smtp_enabled = _bool("SMTP_ENABLED", False)
 
+        # Cloudinary (image uploads)
+        self.cloudinary_cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
+        self.cloudinary_api_key = os.environ.get("CLOUDINARY_API_KEY", "")
+        self.cloudinary_api_secret = os.environ.get("CLOUDINARY_API_SECRET", "")
+
         # Seed admin
         self.admin_email = os.environ.get("ADMIN_EMAIL", "admin@gmail.com")
         self.admin_password = os.environ.get("ADMIN_PASSWORD", "Admin@123")

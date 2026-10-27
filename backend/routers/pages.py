@@ -36,11 +36,24 @@ templates.env.filters["short_inr"] = ml.short_inr
 templates.env.filters["price_label"] = lambda p, t: ml.price_label(p, t)
 
 
+def _asset_version() -> str:
+    """Cache-buster from the newest static asset mtime so edits reload."""
+    paths = [
+        settings.base_dir / "static" / "css" / "style.css",
+        settings.base_dir / "static" / "js" / "app.js",
+    ]
+    try:
+        return str(int(max(p.stat().st_mtime for p in paths)))
+    except OSError:
+        return "1"
+
+
 def _ctx(request: Request, user: Optional[dict], **extra: Any) -> dict[str, Any]:
     base = {
         "request": request,
         "current_user": serialize_user(user) if user else None,
         "app_name": settings.app_name,
+        "asset_version": _asset_version(),
     }
     base.update(extra)
     return base

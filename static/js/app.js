@@ -117,6 +117,133 @@ function initPropertyForm() {
   const listingType = form.querySelector("[name=listing_type]");
   const propType = form.querySelector("[name=property_type]");
 
+  /* ---- Image uploader (files are sent to Cloudinary only on save) ---- */
+  const MAX_IMAGES = 15;
+  const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+  // Each item: { url: string|null (already on Cloudinary), file: File|null (pending), preview: string }
+  let items = (Array.isArray(window.NESTQUEST_IMAGES) ? window.NESTQUEST_IMAGES : [])
+    .map(function (u) { return { url: u, file: null, preview: u }; });
+  const uploader = document.getElementById("imageUploader");
+  const imageInput = document.getElementById("imageInput");
+  const previewGrid = document.getElementById("imagePreviews");
+
+  function renderPreviews() {
+    if (!previewGrid) return;
+    previewGrid.innerHTML = "";
+    items.forEach(function (it, idx) {
+      const item = document.createElement("div");
+      item.className = "upload-item";
+
+      const img = document.createElement("img");
+      img.src = it.preview;
+      img.alt = "Property photo " + (idx + 1);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "upload-remove";
+      removeBtn.dataset.removeImage = String(idx);
+      const removeIcon = document.createElement("i");
+      removeIcon.className = "bi bi-x-lg";
+      removeBtn.appendChild(removeIcon);
+
+      item.appendChild(img);
+      item.appendChild(removeBtn);
+
+      if (idx === 0) {
+        const badge = document.createElement("span");
+        badge.className = "cover-badge";
+        badge.textContent = "Cover";
+        item.appendChild(badge);
+      }
+      previewGrid.appendChild(item);
+    });
+  }
+
+  // Add selected/dropped files to local state with a preview — NO upload yet.
+  function addFiles(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    for (const file of files) {
+      if (!file.type || !file.type.startsWith("image/")) {
+        toast(file.name + ": only image files are allowed.", "error");
+        continue;
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        toast(file.name + ": image exceeds 10 MB.", "error");
+        continue;
+      }
+      if (items.length >= MAX_IMAGES) {
+        toast("You can add a maximum of 15 images.", "error");
+        break;
+      }
+      items.push({ url: null, file: file, preview: URL.createObjectURL(file) });
+    }
+    if (imageInput) imageInput.value = "";
+    renderPreviews();
+  }
+
+  // Upload any pending files to Cloudinary and return the ordered list of URLs.
+  async function resolveImages() {
+    const pending = items.filter(function (i) { return i.file; });
+    let uploaded = [];
+    if (pending.length) {
+      const fd = new FormData();
+      pending.forEach(function (i) { fd.append("files", i.file); });
+      const res = await API.post("/api/uploads/images", fd);
+      uploaded = Array.isArray(res.urls) ? res.urls : [];
+    }
+    let u = 0;
+    const finalUrls = [];
+    items.forEach(function (it) {
+      if (it.file) {
+        if (u < uploaded.length) finalUrls.push(uploaded[u++]);
+      } else if (it.url) {
+        finalUrls.push(it.url);
+      }
+    });
+    return finalUrls;
+  }
+
+  if (uploader) {
+    uploader.addEventListener("click", function (e) {
+      if (e.target.closest("[data-remove-image]")) return;
+      if (imageInput) imageInput.click();
+    });
+    uploader.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      uploader.classList.add("dragover");
+    });
+    uploader.addEventListener("dragleave", function () {
+      uploader.classList.remove("dragover");
+    });
+    uploader.addEventListener("drop", function (e) {
+      e.preventDefault();
+      uploader.classList.remove("dragover");
+      addFiles(e.dataTransfer.files);
+    });
+  }
+
+  if (imageInput) {
+    imageInput.addEventListener("change", function () {
+      addFiles(imageInput.files);
+    });
+  }
+
+  if (previewGrid) {
+    previewGrid.addEventListener("click", function (e) {
+      const btn = e.target.closest("[data-remove-image]");
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.removeImage, 10);
+      if (!isNaN(idx) && idx >= 0 && idx < items.length) {
+        const removed = items.splice(idx, 1)[0];
+        if (removed && removed.file && removed.preview) URL.revokeObjectURL(removed.preview);
+        renderPreviews();
+      }
+    });
+  }
+
+  renderPreviews();
+
   // Commercial listings don't need bedrooms/bathrooms in the same way.
   function syncListingFields() {
     const commercial = listingType?.value === "commercial";
@@ -200,38 +327,40 @@ function initPropertyForm() {
 
     const fd = new FormData(form);
     const amenities = Array.from(form.querySelectorAll("[name=amenities]:checked")).map((c) => c.value);
-    const images = (fd.get("images") || "")
-      .split(/\s*[\n,]\s*/)
-      .map((s) => s.trim())
-      .filter(Boolean);
 
     const num = (k, d = 0) => (fd.get(k) === "" || fd.get(k) === null ? d : Number(fd.get(k)));
-    const payload = {
-      title: (fd.get("title") || "").trim(),
-      description: (fd.get("description") || "").trim(),
-      listing_type: fd.get("listing_type"),
-      property_type: fd.get("property_type"),
-      price: num("price"),
-      area_sqft: num("area_sqft"),
-      bedrooms: num("bedrooms"),
-      bathrooms: num("bathrooms"),
-      balconies: num("balconies"),
-      floor: (fd.get("floor") || "").trim() || null,
-      total_floors: fd.get("total_floors") ? num("total_floors") : null,
-      furnishing: fd.get("furnishing"),
-      facing: fd.get("facing") || null,
-      age_years: fd.get("age_years") ? num("age_years") : null,
-      city: (fd.get("city") || "").trim(),
-      locality: (fd.get("locality") || "").trim(),
-      address: (fd.get("address") || "").trim(),
-      pincode: (fd.get("pincode") || "").trim() || null,
-      contact_name: (fd.get("contact_name") || "").trim() || null,
-      contact_phone: (fd.get("contact_phone") || "").trim() || null,
-      amenities,
-      images,
-    };
-
     try {
+      if (items.some((i) => i.file)) {
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Uploading images…';
+      }
+      const images = await resolveImages();
+      submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
+
+      const payload = {
+        title: (fd.get("title") || "").trim(),
+        description: (fd.get("description") || "").trim(),
+        listing_type: fd.get("listing_type"),
+        property_type: fd.get("property_type"),
+        price: num("price"),
+        area_sqft: num("area_sqft"),
+        bedrooms: num("bedrooms"),
+        bathrooms: num("bathrooms"),
+        balconies: num("balconies"),
+        floor: (fd.get("floor") || "").trim() || null,
+        total_floors: fd.get("total_floors") ? num("total_floors") : null,
+        furnishing: fd.get("furnishing"),
+        facing: fd.get("facing") || null,
+        age_years: fd.get("age_years") ? num("age_years") : null,
+        city: (fd.get("city") || "").trim(),
+        locality: (fd.get("locality") || "").trim(),
+        address: (fd.get("address") || "").trim(),
+        pincode: (fd.get("pincode") || "").trim() || null,
+        contact_name: (fd.get("contact_name") || "").trim() || null,
+        contact_phone: (fd.get("contact_phone") || "").trim() || null,
+        amenities,
+        images,
+      };
+
       const res = isEdit
         ? await API.put(`/api/properties/${id}`, payload)
         : await API.post("/api/properties", payload);

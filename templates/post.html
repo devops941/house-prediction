@@ -132,9 +132,15 @@
 
       <h3 class="mt-3">Photos</h3>
       <div class="field">
-        <label>Image URLs (one per line)</label>
-        <textarea class="textarea" name="images" placeholder="https://…/photo1.jpg&#10;https://…/photo2.jpg">{{ p.images|join('\n') if p else '' }}</textarea>
-        <div class="hint">Paste public image URLs (Unsplash, Imgur, your own CDN). The first image becomes the cover photo.</div>
+        <label>Photos</label>
+        <div class="uploader" id="imageUploader">
+          <i class="bi bi-cloud-arrow-up" style="font-size:1.9rem;display:block;margin-bottom:.4rem;color:var(--primary)"></i>
+          <div class="uploader-text">Click to upload or drag &amp; drop</div>
+          <div class="uploader-hint">PNG/JPG up to 10 MB each &middot; first image becomes the cover</div>
+          <input type="file" id="imageInput" accept="image/*" multiple hidden>
+        </div>
+        <div class="upload-grid" id="imagePreviews"></div>
+        <div class="hint">The first image is used as the cover photo for your listing.</div>
       </div>
 
       <h3 class="mt-3">Contact details</h3>
@@ -186,5 +192,6 @@
 <script>
   window.NESTQUEST_AUTH = true;
   window.NESTQUEST_METRICS = {{ metrics_json|safe if metrics_json else '{}' }};
+  window.NESTQUEST_IMAGES = {{ (p.images if p else [])|tojson }};
 </script>
 {% endblock %}
