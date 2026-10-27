@@ -1,0 +1,34 @@
+{% macro property_card(p) %}
+<article class="prop-card">
+  <a class="prop-media" href="/property/{{ p.id }}">
+    {% if p.cover_image %}
+      <img src="{{ p.cover_image }}" alt="{{ p.title }}" loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+      <div class="noimg" style="display:none"><i class="bi bi-buildings"></i></div>
+    {% else %}
+      <div class="noimg"><i class="bi bi-buildings"></i></div>
+    {% endif %}
+    <span class="tag {% if p.featured %}featured{% endif %}">{{ p.listing_label }}</span>
+  </a>
+  {% if not p.is_owner %}
+  <button class="save-btn {% if p.is_saved %}saved{% endif %}" data-save="{{ p.id }}" title="Shortlist">
+    <i class="bi {% if p.is_saved %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+  </button>
+  {% endif %}
+  <div class="prop-body">
+    <div class="prop-price">{{ p.price_label }}{% if p.listing_type == 'rent' %}<span class="per"></span>{% endif %}</div>
+    <a class="prop-title" href="/property/{{ p.id }}">{{ p.title }}</a>
+    <div class="prop-loc"><i class="bi bi-geo-alt"></i> {{ p.locality }}, {{ p.city }}</div>
+    <div class="prop-specs">
+      {% if p.bedrooms %}<span><i class="bi bi-door-open"></i> {{ p.bedrooms }} BHK</span>{% endif %}
+      {% if p.bathrooms %}<span><i class="bi bi-droplet"></i> {{ p.bathrooms }} Bath</span>{% endif %}
+      <span><i class="bi bi-rulers"></i> {{ p.area_sqft|int }} sq.ft</span>
+      {% if p.furnishing %}<span><i class="bi bi-lamp"></i> {{ p.furnishing_label }}</span>{% endif %}
+    </div>
+    <div class="row between center mt-2">
+      <span class="badge grey">{{ p.property_type_label }}</span>
+      {% if p.verified %}<span class="badge green"><i class="bi bi-patch-check"></i> Verified</span>{% endif %}
+    </div>
+  </div>
+</article>
+{% endmacro %}

@@ -7,11 +7,14 @@ __pycache__/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
 
-# SQLite runtime database
+# Runtime databases
 predictions.db
+*.sqlite3
 
-# Virtual environments
+# Environment / secrets
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -20,3 +23,6 @@ ENV/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% from "_card.html" import property_card %}
+{% block title %}{{ p.title }} in {{ p.locality }}, {{ p.city }}{% endblock %}
+{% block description %}{{ p.listing_label }} · {{ p.property_type_label }} in {{ p.locality }}, {{ p.city }} — {{ p.price_label }}{% endblock %}
+
+{% block content %}
+<div class="container section" style="padding-top:1.6rem">
+  <div class="row wrap center" style="gap:.5rem;margin-bottom:1rem">
+    <a href="/" class="muted small">Home</a> <span class="muted small">/</span>
+    <a href="/properties?listing_type={{ p.listing_type }}" class="muted small">{{ p.listing_label }}</a> <span class="muted small">/</span>
+    <span class="muted small">{{ p.city }}</span>
+  </div>
+
+  {% if p.status != 'active' %}
+  <div class="alert info">
+    <i class="bi bi-info-circle"></i>
+    <span>This listing is currently <b>{{ p.status_label }}</b> and is only visible to you.</span>
+  </div>
+  {% endif %}
+
+  <div class="detail-grid">
+    <div>
+      <div class="gallery">
+        <div class="gallery-main" id="galleryMain">
+          {% if p.cover_image %}
+            <img src="{{ p.images[0] }}" alt="{{ p.title }}" id="mainImage"
+                 onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'noimg',innerHTML:'<i class=\'bi bi-buildings\'></i>'}))">
+          {% else %}
+            <div class="noimg"><i class="bi bi-buildings"></i></div>
+          {% endif %}
+        </div>
+        {% if p.images|length > 1 %}
+        <div class="thumbs">
+          {% for img in p.images %}
+          <img src="{{ img }}" alt="Photo {{ loop.index }}" class="{% if loop.first %}active{% endif %}"
+               onclick="document.getElementById('mainImage').src=this.src;document.querySelectorAll('.thumbs img').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="card card-pad mt-3">
+        <div class="row between wrap center" style="gap:1rem">
+          <div>
+            <h1 class="mb-1">{{ p.title }}</h1>
+            <div class="prop-loc"><i class="bi bi-geo-alt"></i> {{ p.address or p.locality }}, {{ p.locality }}, {{ p.city }}{% if p.pincode %} - {{ p.pincode }}{% endif %}</div>
+          </div>
+          <div class="row" style="gap:.5rem">
+            {% if p.verified %}<span class="badge green"><i class="bi bi-patch-check"></i> Verified</span>{% endif %}
+            {% if p.featured %}<span class="badge amber"><i class="bi bi-star"></i> Featured</span>{% endif %}
+            <span class="badge grey"><i class="bi bi-eye"></i> {{ p.views }} views</span>
+          </div>
+        </div>
+
+        <div class="spec-list mt-3">
+          <div class="spec"><i class="bi bi-tag"></i><div><div class="k">Listing</div><div class="v">{{ p.listing_label }}</div></div></div>
+          <div class="spec"><i class="bi bi-building"></i><div><div class="k">Property type</div><div class="v">{{ p.property_type_label }}</div></div></div>
+          {% if p.bedrooms %}<div class="spec"><i class="bi bi-door-open"></i><div><div class="k">Bedrooms</div><div class="v">{{ p.bedrooms }} BHK</div></div></div>{% endif %}
+          {% if p.bathrooms %}<div class="spec"><i class="bi bi-droplet"></i><div><div class="k">Bathrooms</div><div class="v">{{ p.bathrooms }}</div></div></div>{% endif %}
+          {% if p.balconies %}<div class="spec"><i class="bi bi-wind"></i><div><div class="k">Balconies</div><div class="v">{{ p.balconies }}</div></div></div>{% endif %}
+          <div class="spec"><i class="bi bi-rulers"></i><div><div class="k">Built-up area</div><div class="v">{{ p.area_sqft|int }} sq.ft</div></div></div>
+          <div class="spec"><i class="bi bi-currency-rupee"></i><div><div class="k">Rate</div><div class="v">₹{{ p.price_per_sqft|int }}/sq.ft</div></div></div>
+          <div class="spec"><i class="bi bi-lamp"></i><div><div class="k">Furnishing</div><div class="v">{{ p.furnishing_label }}</div></div></div>
+          {% if p.floor %}<div class="spec"><i class="bi bi-layers"></i><div><div class="k">Floor</div><div class="v">{{ p.floor }}{% if p.total_floors %} of {{ p.total_floors }}{% endif %}</div></div></div>{% endif %}
+          {% if p.facing %}<div class="spec"><i class="bi bi-compass"></i><div><div class="k">Facing</div><div class="v">{{ p.facing }}</div></div></div>{% endif %}
+          {% if p.age_years is not none %}<div class="spec"><i class="bi bi-calendar3"></i><div><div class="k">Age</div><div class="v">{% if p.age_years == 0 %}New{% else %}{{ p.age_years }} yr{% endif %}</div></div></div>{% endif %}
+        </div>
+      </div>
+
+      {% if p.description %}
+      <div class="card card-pad mt-3">
+        <h3>About this property</h3>
+        <p class="text-2 mb-0" style="white-space:pre-line">{{ p.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if p.amenities %}
+      <div class="card card-pad mt-3">
+        <h3>Amenities</h3>
+        <div class="amenity-list">
+          {% for a in p.amenities %}<span class="amenity"><i class="bi bi-check2-circle" style="color:var(--green)"></i> {{ a }}</span>{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <aside class="sticky-side">
+      <div class="price-box">
+        <div class="muted small">{{ 'Monthly rent' if p.listing_type == 'rent' else 'Expected price' }}</div>
+        <div class="price-big">{{ p.price_label }}</div>
+        <div class="muted small">{{ p.price_full }} · ₹{{ p.price_per_sqft|int }}/sq.ft</div>
+
+        <div class="owner-box">
+          <span class="owner-avatar">{{ (p.owner_name or 'O')[0]|upper }}</span>
+          <div class="grow">
+            <div style="font-weight:600">{{ p.owner_name or 'Owner' }}</div>
+            <div class="muted small">Property owner</div>
+          </div>
+        </div>
+
+        {% if p.is_owner %}
+          <a href="/edit/{{ p.id }}" class="btn btn-outline btn-block mb-1"><i class="bi bi-pencil"></i> Edit this listing</a>
+          <a href="/dashboard?tab=listings" class="btn btn-ghost btn-block"><i class="bi bi-speedometer2"></i> Manage listings</a>
+        {% else %}
+          <button class="btn btn-primary btn-block mb-1" data-enquire="{{ p.id }}" data-title="{{ p.title }}">
+            <i class="bi bi-telephone"></i> Contact owner
+          </button>
+          <button class="btn btn-outline btn-block {% if p.is_saved %}saved{% endif %}" data-save="{{ p.id }}">
+            <i class="bi {% if p.is_saved %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+            <span>{% if p.is_saved %}Shortlisted{% else %}Shortlist{% endif %}</span>
+          </button>
+          <p class="hint mt-2 mb-0"><i class="bi bi-shield-check"></i> Contact details are shared with the owner only after you send an enquiry.</p>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+
+  {% if similar %}
+  <div class="section" style="padding-bottom:0">
+    <div class="section-head"><h2>Similar properties in {{ p.city }}</h2></div>
+    <div class="prop-grid">
+      {% for s in similar %}{{ property_card(s) }}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if not p.is_owner %}
+<div class="modal hidden" id="enquiryModal">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-card">
+    <div class="row between center mb-2">
+      <h3 class="mb-0">Contact owner</h3>
+      <button class="link-btn" data-close-modal><i class="bi bi-x-lg"></i></button>
+    </div>
+    <p class="muted small">Enquiring about <b id="enquiryProperty"></b></p>
+    <form id="enquiryForm">
+      <div class="field">
+        <label>Your phone number</label>
+        <input class="input" name="phone" placeholder="98xxxxxxxx" value="{{ current_user.phone or '' if current_user else '' }}">
+      </div>
+      <div class="field">
+        <label>Message to owner</label>
+        <textarea class="textarea" name="message" required placeholder="Hi, I'm interested in this property. Please share more details and availability for a site visit."></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-send"></i> Send enquiry</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>window.NESTQUEST_AUTH = {{ 'true' if current_user else 'false' }};</script>
+{% endblock %}
