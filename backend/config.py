@@ -56,6 +56,12 @@ class Settings:
         self.cloudinary_api_key = os.environ.get("CLOUDINARY_API_KEY", "")
         self.cloudinary_api_secret = os.environ.get("CLOUDINARY_API_SECRET", "")
 
+        # AI Price Estimation (Groq / Anthropic)
+        self.groq_api_key = os.environ.get("GROQ_API_KEY", "")
+        self.groq_model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
+        self.anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        self.anthropic_model = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
+
         # Seed admin
         self.admin_email = os.environ.get("ADMIN_EMAIL", "admin@gmail.com")
         self.admin_password = os.environ.get("ADMIN_PASSWORD", "Admin@123")

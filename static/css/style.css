@@ -469,3 +469,82 @@ small, .small { font-size: .82rem; }
 }
 .link-btn { background: none; border: 0; cursor: pointer; color: var(--muted); font: inherit; font-size: 1.05rem; }
 .link-btn:hover { color: var(--text); }
+
+/* ---------- AI Valuation Breakdown & Insights ---------- */
+.ai-model-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: #eaf0fb;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.4rem;
+}
+.city-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: var(--text);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.insight-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 0.85rem 0;
+}
+.insight-metric-box {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+}
+.insight-metric-box .label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.insight-metric-box .val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 0.1rem;
+}
+.calc-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+.calc-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.45rem 0.6rem;
+  background: #f8fafc;
+  border-left: 3px solid var(--primary);
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+.calc-breakdown-row .info-title {
+  font-weight: 600;
+  color: var(--text);
+}
+.calc-breakdown-row .info-note {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+.calc-breakdown-row .amount {
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+  margin-left: 0.5rem;
+}

@@ -291,6 +291,9 @@ function initPropertyForm() {
     estBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Estimating…';
     try {
       const payload = {
+        city: (form.querySelector("[name=city]")?.value || "Chennai").trim(),
+        locality: (form.querySelector("[name=locality]")?.value || "").trim(),
+        property_type: form.querySelector("[name=property_type]")?.value || "apartment",
         area: Math.round(area),
         bedrooms: Math.max(1, Number(form.querySelector("[name=bedrooms]")?.value || 1)),
         bathrooms: Math.max(1, Number(form.querySelector("[name=bathrooms]")?.value || 1)),
@@ -305,7 +308,8 @@ function initPropertyForm() {
       const box = document.getElementById("estimateBox");
       if (box) {
         box.innerHTML = `<div class="estimate-value">${res.price_label}</div>
-          <div class="muted small">Expected range: <b>${res.range_label}</b> · model R² ≈ ${((window.NESTQUEST_METRICS?.linear_regression?.r2 || 0) * 100).toFixed(0)}%</div>`;
+          <div class="muted small">${res.city ? `<b>${res.city}</b> market · ` : ""}${res.rate_per_sqft_label || ""}</div>
+          <div class="muted small mt-1">Expected range: <b>${res.range_label}</b></div>`;
         box.classList.remove("hidden");
       }
     } catch (err) {
