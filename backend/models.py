@@ -115,8 +115,11 @@ class EnquiryReply(BaseModel):
     reply: str = Field(min_length=2, max_length=1000)
 
 
-# ---------- ML ----------
+# ---------- ML / AI Valuation ----------
 class PredictRequest(BaseModel):
+    city: str = Field(default="Chennai", min_length=2, max_length=100)
+    locality: Optional[str] = Field(default="", max_length=100)
+    property_type: Optional[str] = Field(default="apartment", max_length=50)
     area: int = Field(gt=0, le=200_000)
     bedrooms: int = Field(ge=1, le=20)
     bathrooms: int = Field(ge=1, le=20)
@@ -129,6 +132,11 @@ class PredictRequest(BaseModel):
     airconditioning: bool = False
     prefarea: bool = False
     furnishingstatus: Literal["furnished", "semi-furnished", "unfurnished"] = "semi-furnished"
+
+    @field_validator("city", "locality")
+    @classmethod
+    def _strip_strings(cls, v: Optional[str]) -> Optional[str]:
+        return v.strip() if v else v
 
 
 class ApiResponse(BaseModel):

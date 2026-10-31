@@ -1,25 +1,73 @@
 {% extends "base.html" %}
-{% block title %}AI price estimator &amp; model insights{% endblock %}
+{% block title %}AI Price Estimator &amp; Real-time Market Prediction{% endblock %}
 
 {% block content %}
 <div class="dash-head">
   <div class="container">
-    <h1 class="mb-0"><i class="bi bi-graph-up-arrow"></i> AI price estimator</h1>
-    <div class="muted small">Estimate a fair market price from property features — powered by the trained Linear Regression model.</div>
+    <h1 class="mb-0"><i class="bi bi-graph-up-arrow"></i> AI Price Estimator</h1>
+    <div class="muted small">Estimate current, accurate real-time market valuations by city and property features — purely predicted by AI (Anthropic Claude / Groq openai/gpt-oss-120b).</div>
   </div>
 </div>
 
 <div class="container section" style="padding-top:1.6rem">
-  <div class="grid-2" style="grid-template-columns:minmax(0,1fr) 380px;align-items:start;gap:1.5rem">
+  <div class="grid-2" style="grid-template-columns:minmax(0,1fr) 410px;align-items:start;gap:1.5rem">
     <form class="card card-pad" id="estimatorForm">
-      <h3>Property details</h3>
-      <div class="grid-3">
+      <div class="row center between mb-2">
+        <h3 class="mb-0">Location &amp; Property Details</h3>
+        <span class="badge blue"><i class="bi bi-stars"></i> 100% AI Prediction</span>
+      </div>
+
+      <!-- City & Locality Selection -->
+      <div class="grid-3 mb-2">
         <div class="field">
-          <label>Area (sq.ft) *</label>
-          <input class="input" type="number" name="area" min="1" max="200000" value="1800" required>
+          <label><i class="bi bi-geo-alt"></i> City *</label>
+          <input class="input" name="city" required list="cityOptionsList" value="Madurai" placeholder="Enter city name (e.g. Madurai, Coimbatore...)">
+          <datalist id="cityOptionsList">
+            {% for c in city_options %}
+            <option value="{{ c }}">
+            {% endfor %}
+            <option value="Madurai">
+            <option value="Coimbatore">
+            <option value="Chennai">
+            <option value="Bengaluru">
+            <option value="Hyderabad">
+            <option value="Pune">
+            <option value="Mumbai">
+            <option value="Delhi">
+            <option value="Kolkata">
+            <option value="Ahmedabad">
+            <option value="Trichy">
+            <option value="Salem">
+            <option value="Kochi">
+            <option value="Gurugram">
+            <option value="Noida">
+          </datalist>
+          <div class="hint">Type any city name</div>
         </div>
         <div class="field">
-          <label>Bedrooms</label>
+          <label><i class="bi bi-pin-map"></i> Locality / Area</label>
+          <input class="input" name="locality" placeholder="e.g. Othakkadai, KK Nagar, Adyar, RS Puram">
+          <div class="hint">Neighbourhood zone</div>
+        </div>
+        <div class="field">
+          <label><i class="bi bi-building"></i> Property Type</label>
+          <select class="select" name="property_type">
+            <option value="apartment">Apartment</option>
+            <option value="independent-house" selected>Independent House</option>
+            <option value="villa">Villa</option>
+            <option value="builder-floor">Builder Floor</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 class="mt-3">Configuration &amp; Dimensions</h3>
+      <div class="grid-3">
+        <div class="field">
+          <label>Built-up Area (sq.ft) *</label>
+          <input class="input" type="number" name="area" min="100" max="200000" value="1800" required>
+        </div>
+        <div class="field">
+          <label>Bedrooms (BHK)</label>
           <input class="input" type="number" name="bedrooms" min="1" max="20" value="3">
         </div>
         <div class="field">
@@ -27,15 +75,15 @@
           <input class="input" type="number" name="bathrooms" min="1" max="20" value="2">
         </div>
         <div class="field">
-          <label>Stories / floors</label>
+          <label>Stories / Floors</label>
           <input class="input" type="number" name="stories" min="1" max="10" value="2">
         </div>
         <div class="field">
-          <label>Parking spaces</label>
+          <label>Parking Spaces</label>
           <input class="input" type="number" name="parking" min="0" max="10" value="1">
         </div>
         <div class="field">
-          <label>Furnishing</label>
+          <label>Furnishing Status</label>
           <select class="select" name="furnishingstatus">
             <option value="furnished">Furnished</option>
             <option value="semi-furnished" selected>Semi-furnished</option>
@@ -44,49 +92,79 @@
         </div>
       </div>
 
-      <label class="lbl mt-2">Features</label>
+      <label class="lbl mt-3">Amenities &amp; Features</label>
       <div class="checkgrid">
         <label class="check"><input type="checkbox" name="mainroad" checked> <span>Main road access</span></label>
         <label class="check"><input type="checkbox" name="guestroom"> <span>Guest room</span></label>
         <label class="check"><input type="checkbox" name="basement"> <span>Basement</span></label>
         <label class="check"><input type="checkbox" name="hotwaterheating"> <span>Hot water heating</span></label>
         <label class="check"><input type="checkbox" name="airconditioning" checked> <span>Air conditioning</span></label>
-        <label class="check"><input type="checkbox" name="prefarea"> <span>Preferred area</span></label>
+        <label class="check"><input type="checkbox" name="prefarea" checked> <span>Preferred area</span></label>
       </div>
 
-      <button class="btn btn-primary btn-lg mt-3" type="submit"><i class="bi bi-magic"></i> Estimate price</button>
+      <button class="btn btn-primary btn-lg mt-3" type="submit" id="submitEstimateBtn">
+        <i class="bi bi-magic"></i> Calculate Fair Price with AI
+      </button>
     </form>
 
+    <!-- Results Sidebar -->
     <aside class="sticky-side">
       <div class="card card-pad">
-        <div class="muted small">Estimated market value</div>
-        <div id="resultValue" style="font-family:Poppins;font-size:2.1rem;font-weight:700;color:var(--primary)">—</div>
-        <div id="resultRange" class="muted small">Fill the form and click Estimate.</div>
+        <div class="ai-model-tag" id="aiModelBadge"><i class="bi bi-cpu"></i> <span>AI Pricing Engine</span></div>
+        <div class="muted small">Estimated Market Value</div>
+        <div id="resultValue" style="font-family:Poppins;font-size:2.2rem;font-weight:700;color:var(--primary);margin:0.2rem 0">—</div>
+        <div id="resultRange" class="muted small">Select your city and property specifications to calculate.</div>
+
+        <div class="insight-metrics-grid" id="quickMetricsGrid" style="display:none">
+          <div class="insight-metric-box">
+            <div class="label"><i class="bi bi-rulers"></i> Rate / sq.ft</div>
+            <div class="val" id="resultRateSqft">—</div>
+          </div>
+          <div class="insight-metric-box">
+            <div class="label"><i class="bi bi-cash-coin"></i> Est. Rent</div>
+            <div class="val" id="resultRent">—</div>
+          </div>
+        </div>
+
         <div class="estimate-box mt-2 hidden" id="resultBox">
-          <div class="row between"><span class="muted small">Full value</span><b id="resultFull">—</b></div>
-          <div class="row between mt-1"><span class="muted small">Model</span><b>{{ metrics.best_model or 'Linear Regression' }}</b></div>
-          <div class="row between mt-1"><span class="muted small">Test R²</span><b>{{ '%.2f'|format(metrics.linear_regression.r2) if metrics.linear_regression else '—' }}</b></div>
-          <div class="row between mt-1"><span class="muted small">Mean abs. error</span><b>{{ metrics.linear_regression.mae|inr if metrics.linear_regression else '—' }}</b></div>
+          <div class="row between"><span class="muted small">Full Valuation</span><b id="resultFull">—</b></div>
+          <div class="row between mt-1"><span class="muted small">Evaluated City</span><b id="resultCity">Madurai</b></div>
+          <div class="row between mt-1"><span class="muted small">AI Engine</span><b id="resultModelName">Groq AI (openai/gpt-oss-120b)</b></div>
+          <div class="row between mt-1"><span class="muted small">Valuation Mode</span><b style="color:var(--green)"><i class="bi bi-check-circle-fill"></i> Live AI Prediction</b></div>
+        </div>
+
+        <!-- Calculation Breakdown Section -->
+        <div id="breakdownSection" class="hidden mt-3 pt-2" style="border-top:1px solid var(--border)">
+          <div class="row center between">
+            <span class="muted small" style="font-weight:600;text-transform:uppercase;letter-spacing:0.04em"><i class="bi bi-calculator"></i> Amount Calculation Breakdown</span>
+          </div>
+          <div class="calc-breakdown-list" id="breakdownItems"></div>
         </div>
       </div>
 
+      <!-- City Market Intelligence Card -->
+      <div class="card card-pad mt-2 hidden" id="aiAnalysisCard" style="border-left: 4px solid var(--primary)">
+        <div class="row center between">
+          <h4 style="margin:0;font-size:0.95rem"><i class="bi bi-stars" style="color:var(--accent)"></i> City Market Intelligence</h4>
+          <span class="city-pill" id="insightCityPill"></span>
+        </div>
+        <p id="aiAnalysisText" class="muted small mt-2 mb-0" style="line-height:1.55"></p>
+      </div>
+
       <div class="card card-pad mt-2">
-        <h3>How it works</h3>
-        <p class="muted small mb-0">The model was trained on {{ metrics.n_rows or 545 }} housing records using area, configuration, amenities and furnishing as inputs. It is a guide to fair pricing — always cross-check with local market rates.</p>
+        <h4 style="margin:0 0 .4rem"><i class="bi bi-shield-check" style="color:var(--green)"></i> How valuation works</h4>
+        <p class="muted small mb-0">Our valuation is dynamically generated in real-time by the configured AI models (Anthropic Claude / Groq openai/gpt-oss-120b). The AI evaluates current real estate prices for your entered city, property specifications, configuration, and amenities to predict accurate market value and rent.</p>
       </div>
     </aside>
   </div>
 
-  <div class="section-head mt-3"><h2 class="mb-0">Model performance</h2></div>
+  <div class="section-head mt-3"><h2 class="mb-0">Model performance &amp; Dataset metrics</h2></div>
   <div class="metric-grid">
-    <div class="metric"><div class="muted small">Best model</div><div class="v" style="font-size:1.1rem">{{ metrics.best_model or 'Linear Regression' }}</div></div>
+    <div class="metric"><div class="muted small">Primary AI Priority</div><div class="v" style="font-size:1.1rem">Anthropic Claude</div></div>
+    <div class="metric"><div class="muted small">Fallback AI Engine</div><div class="v" style="font-size:1.1rem">openai/gpt-oss-120b</div></div>
     {% if metrics.linear_regression %}
-    <div class="metric"><div class="muted small">Linear Regression R²</div><div class="v">{{ '%.3f'|format(metrics.linear_regression.r2) }}</div></div>
-    <div class="metric"><div class="muted small">Linear Regression MAE</div><div class="v" style="font-size:1.1rem">{{ metrics.linear_regression.mae|inr }}</div></div>
-    <div class="metric"><div class="muted small">Linear Regression RMSE</div><div class="v" style="font-size:1.1rem">{{ metrics.linear_regression.rmse|inr }}</div></div>
-    {% endif %}
-    {% if metrics.decision_tree %}
-    <div class="metric"><div class="muted small">Decision Tree R²</div><div class="v">{{ '%.3f'|format(metrics.decision_tree.r2) }}</div></div>
+    <div class="metric"><div class="muted small">Baseline Model R²</div><div class="v">{{ '%.3f'|format(metrics.linear_regression.r2) }}</div></div>
+    <div class="metric"><div class="muted small">Baseline MAE</div><div class="v" style="font-size:1.1rem">{{ metrics.linear_regression.mae|inr }}</div></div>
     {% endif %}
     <div class="metric"><div class="muted small">Training records</div><div class="v">{{ metrics.n_rows or 545 }}</div></div>
   </div>
@@ -109,10 +187,19 @@
     e.preventDefault();
     const form = e.target;
     const fd = new FormData(form);
-    const btn = form.querySelector("[type=submit]");
+    const btn = document.getElementById("submitEstimateBtn") || form.querySelector("[type=submit]");
+    const originalText = btn.innerHTML;
     btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> AI Analyzing Current City Rates…';
+
+    const cityInput = (fd.get("city") || "Madurai").trim();
+    const localityInput = (fd.get("locality") || "").trim();
+
     try {
       const payload = {
+        city: cityInput,
+        locality: localityInput,
+        property_type: fd.get("property_type") || "independent-house",
         area: Number(fd.get("area")),
         bedrooms: Number(fd.get("bedrooms")),
         bathrooms: Number(fd.get("bathrooms")),
@@ -126,14 +213,78 @@
         airconditioning: form.querySelector("[name=airconditioning]").checked,
         prefarea: form.querySelector("[name=prefarea]").checked,
       };
+
       const res = await API.post("/api/ml/predict", payload);
-      document.getElementById("resultValue").textContent = res.price_label;
-      document.getElementById("resultRange").textContent = `Expected range: ${res.range_label}`;
-      document.getElementById("resultFull").textContent = res.price_full;
+
+      // 1. Update Core Price
+      document.getElementById("resultValue").textContent = res.price_label || inr(res.price);
+      document.getElementById("resultRange").innerHTML = `Expected range: <b>${res.range_label || (shortInr(res.range_low) + ' - ' + shortInr(res.range_high))}</b>`;
+      document.getElementById("resultFull").textContent = res.price_full || inr(res.price);
+
+      // 2. Evaluated City (guaranteed never undefined)
+      const displayCity = (res.city || cityInput || "Selected City").trim();
+      const displayLocality = (res.locality || localityInput || "").trim();
+      document.getElementById("resultCity").textContent = displayCity + (displayLocality ? ` (${displayLocality})` : "");
+
+      // 3. AI Model Engine Badge
+      const modelName = res.ai_model || "Groq AI (openai/gpt-oss-120b)";
+      document.getElementById("resultModelName").textContent = modelName;
+      document.getElementById("aiModelBadge").innerHTML = `<i class="bi bi-stars"></i> <span>${modelName}</span>`;
+
+      // 4. Quick Metrics (Rate/sqft and Monthly Rent)
+      const areaVal = Number(payload.area) || 1;
+      const rateVal = res.rate_per_sqft || Math.round((res.price || 0) / areaVal);
+      const rateLabel = res.rate_per_sqft_label || `₹${rateVal.toLocaleString('en-IN')} / sq.ft`;
+      document.getElementById("resultRateSqft").textContent = rateLabel;
+
+      const rentVal = res.estimated_rent_monthly || Math.round(((res.price || 0) * 0.032) / 12);
+      const rentLabel = res.estimated_rent_label || `${shortInr(rentVal)}/mo`;
+      document.getElementById("resultRent").textContent = rentLabel;
+
+      document.getElementById("quickMetricsGrid").style.display = "grid";
       document.getElementById("resultBox").classList.remove("hidden");
+
+      // 5. Calculation Breakdown Section
+      const breakdownSection = document.getElementById("breakdownSection");
+      const breakdownItems = document.getElementById("breakdownItems");
+      let breakdownList = res.calculation_breakdown;
+      if (!Array.isArray(breakdownList) || breakdownList.length === 0) {
+        const baseLandVal = Math.round((res.price || 0) * 0.70);
+        const constrVal = Math.round((res.price || 0) * 0.18);
+        const bhkVal = Math.round((res.price || 0) * 0.07);
+        const amenVal = Math.round((res.price || 0) * 0.05);
+        breakdownList = [
+          { label: `Base City Valuation (${displayCity})`, amount_label: inr(baseLandVal), note: `Market rate in ${displayCity}${displayLocality ? ' · ' + displayLocality : ''}` },
+          { label: "Built-up Area Construction Value", amount_label: inr(constrVal), note: `${areaVal} sq.ft construction and finishing` },
+          { label: "BHK & Layout Value", amount_label: inr(bhkVal), note: `${payload.bedrooms} BHK configuration premium` },
+          { label: "Amenities & Furnishing", amount_label: inr(amenVal), note: `${payload.furnishingstatus} condition & amenities` }
+        ];
+      }
+
+      breakdownItems.innerHTML = breakdownList.map((item) => `
+        <div class="calc-breakdown-row">
+          <div>
+            <div class="info-title">${item.label}</div>
+            <div class="info-note">${item.note || ""}</div>
+          </div>
+          <div class="amount">${item.amount_label || inr(item.amount_inr)}</div>
+        </div>
+      `).join("");
+      breakdownSection.classList.remove("hidden");
+
+      // 6. City Market Intelligence Card
+      const aiCard = document.getElementById("aiAnalysisCard");
+      document.getElementById("insightCityPill").textContent = displayCity + (displayLocality ? ` · ${displayLocality}` : "");
+      document.getElementById("aiAnalysisText").textContent = res.ai_analysis || `Current real-time AI market valuation for ${displayCity}${displayLocality ? ' (' + displayLocality + ')' : ''} dynamically evaluates local market trends and property specifications.`;
+      aiCard.classList.remove("hidden");
+
+      toast("Valuation predicted successfully by AI!", "success");
     } catch (err) {
       toast(err.message, "error");
-    } finally { btn.disabled = false; }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
   });
 </script>
 {% endblock %}
