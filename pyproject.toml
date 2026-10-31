@@ -19,6 +19,7 @@ dependencies = [
     "scikit-learn>=1.4",
     "joblib>=1.3",
     "cloudinary>=1.40",
+    "httpx>=0.27.0",
 ]
 
 # matplotlib / seaborn are intentionally excluded here: they are only used by the

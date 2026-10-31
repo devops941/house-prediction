@@ -7,16 +7,55 @@ No static or hardcoded city benchmark dictionaries are used.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from typing import Any, Dict, List, Optional
+import urllib.error
+import urllib.request
 
-import httpx
+try:
+    import httpx
+except ImportError:
+    httpx = None  # type: ignore[assignment]
 
 from ..config import settings
 from . import predict as ml_predict
 
 logger = logging.getLogger("nestquest.ai_valuation")
+
+
+async def _post_json(url: str, headers: dict[str, str], body: dict[str, Any], timeout: float = 25.0) -> dict[str, Any]:
+    """Execute HTTP POST with JSON payload.
+
+    Uses httpx when installed, with a seamless fallback to Python's built-in urllib
+    to ensure full compatibility with serverless environments (e.g. Vercel).
+    """
+    if httpx is not None:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(url, headers=headers, json=body)
+            if resp.status_code != 200:
+                logger.warning("API POST error %s: %s", resp.status_code, resp.text[:300])
+                raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:150]}")
+            return resp.json()
+
+    # Fallback to standard library urllib
+    def _sync_post() -> dict[str, Any]:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(body).encode("utf-8"),
+            headers=headers,
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as err:
+            err_msg = err.read().decode("utf-8", errors="ignore")[:200]
+            logger.warning("urllib POST error %s: %s", err.code, err_msg)
+            raise RuntimeError(f"HTTP {err.code}: {err_msg}") from err
+
+    return await asyncio.to_thread(_sync_post)
 
 
 async def _call_anthropic(payload: dict) -> Optional[dict]:
@@ -86,53 +125,48 @@ Return strictly a valid JSON object with keys:
         "messages": [{"role": "user", "content": prompt}],
     }
 
-    async with httpx.AsyncClient(timeout=25.0) as client:
-        resp = await client.post("https://api.anthropic.com/v1/messages", headers=headers, json=body)
-        if resp.status_code != 200:
-            logger.warning("Anthropic API error %s: %s", resp.status_code, resp.text[:300])
-            raise RuntimeError(f"Anthropic API returned HTTP {resp.status_code}: {resp.text[:150]}")
-        data = resp.json()
-        raw_text = data["content"][0]["text"].strip()
-        if "```json" in raw_text:
-            raw_text = raw_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in raw_text:
-            raw_text = raw_text.split("```")[1].split("```")[0].strip()
-        parsed = json.loads(raw_text)
+    data = await _post_json("https://api.anthropic.com/v1/messages", headers=headers, body=body, timeout=25.0)
+    raw_text = data["content"][0]["text"].strip()
+    if "```json" in raw_text:
+        raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+    elif "```" in raw_text:
+        raw_text = raw_text.split("```")[1].split("```")[0].strip()
+    parsed = json.loads(raw_text)
 
-        price = round(float(parsed.get("estimated_price") or 0))
-        if price <= 0:
-            raise ValueError("AI returned invalid estimated price <= 0")
+    price = round(float(parsed.get("estimated_price") or 0))
+    if price <= 0:
+        raise ValueError("AI returned invalid estimated price <= 0")
 
-        price_low = round(float(parsed.get("price_low") or (price * 0.92)))
-        price_high = round(float(parsed.get("price_high") or (price * 1.08)))
-        rate_per_sqft = round(float(parsed.get("city_avg_rate_per_sqft") or (price / (area or 1))))
-        monthly_rent = round(float(parsed.get("estimated_rent_monthly") or ((price * 0.032) / 12)))
+    price_low = round(float(parsed.get("price_low") or (price * 0.92)))
+    price_high = round(float(parsed.get("price_high") or (price * 1.08)))
+    rate_per_sqft = round(float(parsed.get("city_avg_rate_per_sqft") or (price / (area or 1))))
+    monthly_rent = round(float(parsed.get("estimated_rent_monthly") or ((price * 0.032) / 12)))
 
-        raw_breakdown = parsed.get("calculation_breakdown") or []
-        breakdown = []
-        for item in raw_breakdown:
-            amt = float(item.get("amount_inr") or 0)
-            breakdown.append({
-                "label": item.get("label", "Valuation Factor"),
-                "amount_inr": round(amt),
-                "amount_label": ml_predict.format_inr(amt),
-                "note": item.get("note", ""),
-            })
+    raw_breakdown = parsed.get("calculation_breakdown") or []
+    breakdown = []
+    for item in raw_breakdown:
+        amt = float(item.get("amount_inr") or 0)
+        breakdown.append({
+            "label": item.get("label", "Valuation Factor"),
+            "amount_inr": round(amt),
+            "amount_label": ml_predict.format_inr(amt),
+            "note": item.get("note", ""),
+        })
 
-        return {
-            "price": price,
-            "price_low": price_low,
-            "price_high": price_high,
-            "city": city,
-            "locality": locality,
-            "rate_per_sqft": rate_per_sqft,
-            "rate_per_sqft_label": f"₹{rate_per_sqft:,} / sq.ft",
-            "estimated_rent_monthly": monthly_rent,
-            "estimated_rent_label": f"{ml_predict.short_inr(monthly_rent)}/mo",
-            "ai_analysis": parsed.get("ai_analysis") or f"Current market valuation for {city}.",
-            "calculation_breakdown": breakdown,
-            "ai_model": f"Anthropic Claude ({model})",
-        }
+    return {
+        "price": price,
+        "price_low": price_low,
+        "price_high": price_high,
+        "city": city,
+        "locality": locality,
+        "rate_per_sqft": rate_per_sqft,
+        "rate_per_sqft_label": f"₹{rate_per_sqft:,} / sq.ft",
+        "estimated_rent_monthly": monthly_rent,
+        "estimated_rent_label": f"{ml_predict.short_inr(monthly_rent)}/mo",
+        "ai_analysis": parsed.get("ai_analysis") or f"Current market valuation for {city}.",
+        "calculation_breakdown": breakdown,
+        "ai_model": f"Anthropic Claude ({model})",
+    }
 
 
 async def _call_groq(payload: dict) -> Optional[dict]:
@@ -223,49 +257,44 @@ Return ONLY a valid JSON object matching this schema:
         "temperature": 0.2,
     }
 
-    async with httpx.AsyncClient(timeout=25.0) as client:
-        resp = await client.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=body)
-        if resp.status_code != 200:
-            logger.error("Groq AI API error %s: %s", resp.status_code, resp.text[:300])
-            raise RuntimeError(f"Groq API returned HTTP {resp.status_code}: {resp.text[:150]}")
-        data = resp.json()
-        content = data["choices"][0]["message"]["content"]
-        parsed = json.loads(content)
+    data = await _post_json("https://api.groq.com/openai/v1/chat/completions", headers=headers, body=body, timeout=25.0)
+    content = data["choices"][0]["message"]["content"]
+    parsed = json.loads(content)
 
-        price = round(float(parsed.get("estimated_price") or 0))
-        if price <= 0:
-            raise ValueError("AI returned invalid estimated price <= 0")
+    price = round(float(parsed.get("estimated_price") or 0))
+    if price <= 0:
+        raise ValueError("AI returned invalid estimated price <= 0")
 
-        price_low = round(float(parsed.get("price_low") or (price * 0.92)))
-        price_high = round(float(parsed.get("price_high") or (price * 1.08)))
-        rate_per_sqft = round(float(parsed.get("city_avg_rate_per_sqft") or (price / (area or 1))))
-        monthly_rent = round(float(parsed.get("estimated_rent_monthly") or ((price * 0.032) / 12)))
+    price_low = round(float(parsed.get("price_low") or (price * 0.92)))
+    price_high = round(float(parsed.get("price_high") or (price * 1.08)))
+    rate_per_sqft = round(float(parsed.get("city_avg_rate_per_sqft") or (price / (area or 1))))
+    monthly_rent = round(float(parsed.get("estimated_rent_monthly") or ((price * 0.032) / 12)))
 
-        raw_breakdown = parsed.get("calculation_breakdown") or []
-        breakdown = []
-        for item in raw_breakdown:
-            amt = float(item.get("amount_inr") or 0)
-            breakdown.append({
-                "label": item.get("label", "Valuation Factor"),
-                "amount_inr": round(amt),
-                "amount_label": ml_predict.format_inr(amt),
-                "note": item.get("note", ""),
-            })
+    raw_breakdown = parsed.get("calculation_breakdown") or []
+    breakdown = []
+    for item in raw_breakdown:
+        amt = float(item.get("amount_inr") or 0)
+        breakdown.append({
+            "label": item.get("label", "Valuation Factor"),
+            "amount_inr": round(amt),
+            "amount_label": ml_predict.format_inr(amt),
+            "note": item.get("note", ""),
+        })
 
-        return {
-            "price": price,
-            "price_low": price_low,
-            "price_high": price_high,
-            "city": city,
-            "locality": locality,
-            "rate_per_sqft": rate_per_sqft,
-            "rate_per_sqft_label": f"₹{rate_per_sqft:,} / sq.ft",
-            "estimated_rent_monthly": monthly_rent,
-            "estimated_rent_label": f"{ml_predict.short_inr(monthly_rent)}/mo",
-            "ai_analysis": parsed.get("ai_analysis") or f"Current market valuation for {city}.",
-            "calculation_breakdown": breakdown,
-            "ai_model": f"Groq AI ({model})",
-        }
+    return {
+        "price": price,
+        "price_low": price_low,
+        "price_high": price_high,
+        "city": city,
+        "locality": locality,
+        "rate_per_sqft": rate_per_sqft,
+        "rate_per_sqft_label": f"₹{rate_per_sqft:,} / sq.ft",
+        "estimated_rent_monthly": monthly_rent,
+        "estimated_rent_label": f"{ml_predict.short_inr(monthly_rent)}/mo",
+        "ai_analysis": parsed.get("ai_analysis") or f"Current market valuation for {city}.",
+        "calculation_breakdown": breakdown,
+        "ai_model": f"Groq AI ({model})",
+    }
 
 
 async def estimate_property_value(payload: dict) -> dict:
